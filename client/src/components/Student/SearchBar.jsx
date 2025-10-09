@@ -2,6 +2,8 @@ import React from "react";
 import {assets} from '../../../LMS_assets/assets/assets.js'
 
 const SearchBar = () => {
+    //filtering functionality to be implemented yettt!!!
+    //search => navigates to that route
   return (
     <form
       className="max-w-xl w-full md:h-14 h-12 flex items-center bg-white 
