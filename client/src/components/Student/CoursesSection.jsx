@@ -4,6 +4,9 @@ import { Link } from "react-router-dom";
 import CourseCard from "./CourseCard";
 const CoursesSection = () => {
   const { allcourses} = useAppContext();
+
+  // console.log('all in course_sect : ', allcourses);
+  
   return (
     <div className="py-16 md:px-40 px-8">
       <h2 className="text-3xl font-medium text-gray-800">
@@ -23,7 +26,7 @@ const CoursesSection = () => {
       </div>
 
       <Link
-        to={"/course_list"}
+        to={"/course-list"}
         onClick={() => scrollTo(0, 0)}
         className="text-gray-500 border border-gray-500/30 px-10 py-3 rounded"
       >
