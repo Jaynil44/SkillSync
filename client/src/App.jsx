@@ -12,6 +12,7 @@ import AddCourse from './pages/Educator/AddCourse'
 import MyCourses from './pages/Educator/MyCourses'
 import StudentsEnrolled from './pages/Educator/StudentsEnrolled'
 import Navbar from './components/Student/Navbar'
+import 'quill/dist/quill.snow.css'
 // import SearchBar from './components/Student/SearchBar'
 
 function App() {
@@ -28,12 +29,19 @@ function App() {
         <Route path='/player/:courseId' element = {<Player />}/>
         <Route path='/loading/:path' element = {<Loading/>}/>
         <Route path='/educator' element = {<Educator/>} >
-            <Route path='educator' element ={<Dashboard/>} />
+            <Route path='/educator' element ={<Dashboard/>} />
             <Route path='add-course' element={<AddCourse/>} />
             <Route path='my-courses' element={<MyCourses/>} />
             <Route path='students-enrolled' element = {<StudentsEnrolled/>} />
         </Route>
       </Routes>
+
+      {/* NOTE : when we have / -> in the sub route, that means the child is 
+        ignoring the parent and overriding the parent path, with its own, it is 
+        no longer a child route
+        => in this case we can use index => that matches the child route exactly 
+        with the parent, and if matches than mounts the component...!!
+        <Route index element={<Dashboard />} />*/}
     </>
   )
 }

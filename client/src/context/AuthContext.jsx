@@ -5,17 +5,24 @@ import { useNavigate } from 'react-router-dom';
 import humanizeDuration from 'humanize-duration';
 
 export const AppContextProvider = ({children}) => {
-    const currency = import.meta.env.VITE_CURRENCY;
+    const currency = import.meta.env.VITE_CURRENCY; // current currency
     const [allcourses, setallcourses] = useState([]);
-    const [isEducator, setIsEducator] = useState(true);
-    const navigate = useNavigate();
+    const [isEducator, setIsEducator] = useState(true);// to conditionally render the details in the header
+    const [enrolledCourses, setEnrolledCourses] = useState([]); // to display courses in my enrollments
+    const navigate = useNavigate(); // => can't directly use useNavigate hook inside react component...!!
     
+    //for fetchina all the deatails..!!
     useEffect(()=>{
         fetchAllCourses();
+        fetchEnrolledCourses();
     }, []);
 
     const fetchAllCourses = async () => {
         setallcourses(dummyCourses);
+    }
+    
+    const fetchEnrolledCourses = () => {
+        setEnrolledCourses(dummyCourses);
     }
 
     //calculates avg rating of the course : 
@@ -63,7 +70,8 @@ export const AppContextProvider = ({children}) => {
 
     const value = {
         currency, allcourses, avgRating, isEducator, setIsEducator, navigate,
-        calculateChapterTime, calculateCourseDuration, calculateNoOfLectures
+        calculateChapterTime, calculateCourseDuration, calculateNoOfLectures, 
+        fetchAllCourses, fetchEnrolledCourses, enrolledCourses
     };
 
     return(
