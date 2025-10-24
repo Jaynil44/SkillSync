@@ -19,7 +19,7 @@ function Sidebar() {
         <NavLink
           to={item.path}
           key={item.name}
-          end={item.path === '/educator'} // Add end prop for the Dashboard link
+          end={item.path === '/educator'} // Add end prop for the Dashboard link -> strictly /edu => if smthing like /deu/xyz => not active
           className={({ isActive }) =>
             `flex items-center md:flex-row flex-col md:justify-start justify-center py-3.5 md:px-10 gap-3 ${isActive
               ? 'bg-indigo-50 border-r-[6px] border-indigo-500/90'
