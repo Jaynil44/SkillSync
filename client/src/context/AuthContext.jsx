@@ -3,6 +3,7 @@ export const Appcontext = createContext();
 import {dummyCourses} from '../../LMS_assets/assets/assets.js'
 import { useNavigate } from 'react-router-dom';
 import humanizeDuration from 'humanize-duration';
+import { useAuth, useUser } from '@clerk/clerk-react';
 
 export const AppContextProvider = ({children}) => {
     const currency = import.meta.env.VITE_CURRENCY; // current currency
@@ -11,7 +12,19 @@ export const AppContextProvider = ({children}) => {
     const [enrolledCourses, setEnrolledCourses] = useState([]); // to display courses in my enrollments
     const navigate = useNavigate(); // => can't directly use useNavigate hook inside react component...!!
     
-    //for fetchina all the deatails..!!
+    const {getToken}= useAuth();
+    const {user}= useUser();
+
+    const fetchingTocken = async () => {
+        console.log(await getToken());
+    }
+    useEffect(() => {
+        if(user){
+            fetchingTocken();
+        }
+    }, [user]);
+    
+    //for fetching all the deatails..!!
     useEffect(()=>{
         fetchAllCourses();
         fetchEnrolledCourses();

@@ -1,6 +1,5 @@
 import mongoose from 'mongoose'
 import express from 'express'
-import { timeStamp } from 'console';
 import { ref } from 'process';
 
 const UserSchema = mongoose.Schema({
@@ -26,7 +25,7 @@ const UserSchema = mongoose.Schema({
             ref : 'Course'
         }
     ]
-}, {timeStamp : true})
+}, {timestamps : true})
 
 const User = mongoose.model('User', UserSchema);
 
