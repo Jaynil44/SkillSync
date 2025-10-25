@@ -4,6 +4,7 @@ import 'dotenv/config'
 import cors from 'cors'
 // import connectDB from './configs/mongoDB';
 import connectDB from '../server/configs/mongoDB.js';
+import clerkWebHooks from '../server/controllers/webhooks.js';
 
 //creating an app -> like opening a box
 const app = express();
@@ -18,6 +19,7 @@ const port = process.env.PORT || 5000;
 
 //define all the api endpoints
 app.get('/', (req, res) => res.send("server working"));
+app.use('/clerk', express.json(), clerkWebHooks);
 
 //listen
 app.listen(port, ()=>{
