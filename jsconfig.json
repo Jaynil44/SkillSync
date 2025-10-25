@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
+    "baseUrl": ".",
+    "checkJs": true,
+    "paths": {
+      "server/*": ["server/*"],
+      "client/*": ["client/*"]
+    }
+  },
+  "exclude": ["node_modules"]
+}
