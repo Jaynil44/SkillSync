@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
+    // Use the parent workspace root as the base so import/path suggestions
+    // resolve from the repository root (SkillSync) instead of the server folder.
+    "baseUrl": "..",
+    "checkJs": true,
+    "types": ["node", "express"],
+    // Helpful path aliases if you want to import like: import x from 'server/models/x'
+    "paths": {
+      "server/*": ["server/*"],
+      "client/*": ["client/*"]
+    }
+  },
+  "exclude": ["node_modules"]
+}
