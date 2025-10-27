@@ -23,7 +23,6 @@ const clerkWebHooks = async (req, res) => {
         const {data, type} = req.body;
 
         if(type === "user.created"){
-            // res.json({'user created'});
             const userData = {
                 _id : data.id, 
                 userName : data.first_name + " " + data.last_name,
