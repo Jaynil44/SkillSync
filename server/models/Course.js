@@ -44,6 +44,7 @@ const courseSchema = mongoose.Schema({
         }
     ], 
     enrolledStudents : [
+        //array of all the ids of enrolled students.
         {
             type : String, 
             ref : 'User', 

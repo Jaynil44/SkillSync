@@ -3,12 +3,14 @@ import { clerkClient } from '@clerk/express'
 import { log } from 'console';
 import {v2 as cloudinary} from 'cloudinary'
 import Course from '../models/Course.js';
+import User from '../models/User.js'
+import Purchase from '../models/Purchase.js';
+
 export const studentToEdu = async (req, res) => {
     // console.log('request-structure :  => ' , JSON.stringify(req));//controller
     try {
 
         const { userId } = req.auth();
-        // console.log(req.auth(), req.auth);
         
         await clerkClient.users.updateUserMetadata(userId, {
             publicMetadata: {
@@ -61,3 +63,84 @@ export const addCourse = async (req, res) => {
     }
 }
 
+// => (total Earning , enrolled Students(name, course), total courses published) : 
+export const educatorDashboardData = async (req, res) => {
+    try {
+        const educatorId = req.auth().userId;
+
+        //fetching all courses, and courseId's
+        const courses = Course.find({educator : educatorId});
+        const coursesId = courses.map(currCourse => currCourse.courseId);
+        const totalCourses = courses.length;
+
+        const purchases = Purchase.find({
+            courseId : {$in : coursesId}, 
+            status : 'completed'
+        });
+        
+        //calculating total earning
+        let totalEarning = 0;
+        purchases.forEach(e => {
+            totalEarning += e.amount;
+        });
+
+        //get all the enrolled students data : 
+        const enrolledStudents = [];
+        courses.forEach(singleCourse => {
+            const students = User.find({
+                _id : {$in : singleCourse.enrolledStudents}
+            }, 'userName imageUrl');
+
+            students.forEach(student => {
+                enrolledStudents.push({
+                    courseTitle : singleCourse.courseTitle,  
+                    student
+                })
+            })
+        });
+
+        res.json({
+            status : true, 
+            dashboardData : {
+                totalEarning, 
+                totalCourses, 
+                enrolledStudents
+            }
+        })
+    } catch (error) {
+        res.json({
+            success : false, 
+            error : error.message
+        })
+    };
+} 
+
+// (student-name, course_name, enrolled_date)
+export const getEnrolledStudentsData = async (req, res) => {
+    try {
+        const educatorId = req.auth().userId;
+        const courses = Course.find({educator : educatorId});
+        const coursesId = courses.map(currCourse => currCourse.courseId);
+
+        const purchases = Purchase.find({
+            courseId : {$in : coursesId}, 
+            status : 'completed'
+        }).populate('courseId', 'courseTitle').populate('userId', 'userName imageUrl');
+
+        const enrolledStudents = purchases.map(singleCourse => ({
+            student : singleCourse.userId,
+            courseTitle : coursesId.courseTitle, 
+            purchaseDate : singleCourse.createdAt
+        }))
+
+        res.json({
+            success : true, 
+            enrolledStudents
+        })
+    } catch (error) {
+        res.json({
+            success : false, 
+            error : error.message
+        })
+    }
+}
