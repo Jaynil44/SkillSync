@@ -6,6 +6,7 @@ import Course from '../models/Course.js';
 import User from '../models/User.js'
 import Purchase from '../models/Purchase.js';
 
+// to change the role!
 export const studentToEdu = async (req, res) => {
     // console.log('request-structure :  => ' , JSON.stringify(req));//controller
     try {
@@ -25,6 +26,7 @@ export const studentToEdu = async (req, res) => {
     }
 }
 
+// adding course
 export const addCourse = async (req, res) => {
     //controller to write in the add course
     try{
@@ -63,17 +65,35 @@ export const addCourse = async (req, res) => {
     }
 }
 
+// fetch all courses of any edu
+export const getEducatorCourses = async (req, res) => {
+    try {
+        const educatorId = req.auth().userId;
+        const allCourses = await Course.find({educator : educatorId, isPublished : true});
+        
+        res.status(201).json({
+            success : true, 
+            courses : allCourses
+        })
+    } catch (error) {
+        res.status(500).json({
+            success : false, 
+            error : error.message
+        })
+    }
+};
+
 // => (total Earning , enrolled Students(name, course), total courses published) : 
 export const educatorDashboardData = async (req, res) => {
     try {
         const educatorId = req.auth().userId;
 
         //fetching all courses, and courseId's
-        const courses = Course.find({educator : educatorId});
+        const courses = await Course.find({educator : educatorId});
         const coursesId = courses.map(currCourse => currCourse.courseId);
         const totalCourses = courses.length;
 
-        const purchases = Purchase.find({
+        const purchases = await Purchase.find({
             courseId : {$in : coursesId}, 
             status : 'completed'
         });
@@ -86,8 +106,8 @@ export const educatorDashboardData = async (req, res) => {
 
         //get all the enrolled students data : 
         const enrolledStudents = [];
-        courses.forEach(singleCourse => {
-            const students = User.find({
+        for (const singleCourse of courses) { 
+            const students = await User.find({
                 _id : {$in : singleCourse.enrolledStudents}
             }, 'userName imageUrl');
 
@@ -97,7 +117,7 @@ export const educatorDashboardData = async (req, res) => {
                     student
                 })
             })
-        });
+        };
 
         res.json({
             status : true, 
@@ -119,10 +139,10 @@ export const educatorDashboardData = async (req, res) => {
 export const getEnrolledStudentsData = async (req, res) => {
     try {
         const educatorId = req.auth().userId;
-        const courses = Course.find({educator : educatorId});
+        const courses = await Course.find({educator : educatorId});
         const coursesId = courses.map(currCourse => currCourse.courseId);
 
-        const purchases = Purchase.find({
+        const purchases = await Purchase.find({
             courseId : {$in : coursesId}, 
             status : 'completed'
         }).populate('courseId', 'courseTitle').populate('userId', 'userName imageUrl');

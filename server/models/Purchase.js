@@ -13,8 +13,8 @@ const PurchaseSchema = mongoose.Schema({
     }, 
     status : {
         type : String, 
+        enum : ['pending', 'completed', 'failed'],
         default : 'pending'
-        enum : ['pending', 'completed', 'failed']
     }
 }, {timestamps : true});
 

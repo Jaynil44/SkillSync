@@ -12,10 +12,10 @@ const lectureSchema = mongoose.Schema({
 }, {_id: false});
 
 const chapterSchema= mongoose.Schema({
-    courseId: {type:String, required : true}, 
-    courseTitle : {type : String, required: true}, 
-    courseOrder : {type: Number, required : true}, 
-    courseContent : [lectureSchema]
+    chapterId: {type:String, required : true}, 
+    chapterTitle : {type : String, required: true}, 
+    chapterOrder : {type: Number, required : true}, 
+    chapterContent : [lectureSchema]
 }, {_id : false});
 
 const courseSchema = mongoose.Schema({
@@ -60,5 +60,5 @@ const courseSchema = mongoose.Schema({
 //  Example: courseContent might later get chapters pushed into it. If you remove the empty object,
 //  you’d have to recreate it first. 
 
-const Course = mongoose.model('course', courseSchema);
+const Course = mongoose.model('Course', courseSchema);
 export default Course;
