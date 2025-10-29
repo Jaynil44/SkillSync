@@ -55,6 +55,7 @@ const courseSchema = mongoose.Schema({
         default : true
     }
 } , { timestamps: true, minimize: false });
+
 //  why minimise:false => If your schema has nested objects (like chapters, lessons, ratings)
 //  that start empty, you might want to keep the structure in the database.
 //  Example: courseContent might later get chapters pushed into it. If you remove the empty object,

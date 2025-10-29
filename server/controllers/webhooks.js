@@ -63,29 +63,33 @@ const stripeInstance = new Stripe(process.env.STRIPE_SECRET_KEY);
 // [success, failed, failed, failed].
 
 export const stripeWebHook = async (request, response) => {
-    const sig = request.headers['stripe-signature'];
+    const sig = request.headers['stripe-signature']; // to verify that this request really came from Stripe.
 
     let event;
 
     try {
-        event = Stripe.webhooks.constructEvent(request.body, sig, endpointSecret);
+        event = stripeInstance.webhooks.constructEvent(request.body, sig, process.env.STRIPE_WEBHOOK_SECRET); // verify and if valid create payment event
     }
     catch (err) {
         response.status(400).send(`Webhook Error: ${err.message}`);
     }
-
+    const paymentIntent = event.data.object;
+    const paymentIntentId = paymentIntent.id;
+    
+    const session = await stripeInstance.checkout.sessions.list({
+        payment_intent: paymentIntentId
+    });
+    
+    
+    const {purchaseId} = session.data[0].metadata;
+    
+    const currPurchase = await Purchase.findById(purchaseId);
+    
+    console.log('Webhook Event Type:', event.type);
+    console.log('Payment Intent ID:', paymentIntent.id);
+    console.log('Session:', session.data[0]);
     switch (event.type) {
         case 'payment_intent.succeeded':{
-            const paymentIntent = event.data.object;
-            const paymentIntentId = paymentIntent.id;
-
-            const session = await Stripe.Checkout.sessions.list({
-                payment_intent : paymentIntentId
-            })
-
-            const purchaseId = session.data[0].metadata;
-
-            const currPurchase = await Purchase.findById(purchaseId);
 
             const courseId = currPurchase.courseId.toString();
             const userId = currPurchase.userId.toString();
@@ -104,15 +108,7 @@ export const stripeWebHook = async (request, response) => {
             break;
         }
         case 'payment_intent.payment_failed':{
-            const paymentIntent = event.data.object;
-            const paymentIntentId = paymentIntent.id;
 
-            const session = await Stripe.Checkout.sessions.list({
-                payment_intent : paymentIntentId
-            })
-
-            const purchaseId = session.data[0].metadata;
-            const currPurchase = await Purchase.findById(purchaseId);
             currPurchase.status = 'failed';
             await currPurchase.save();
 
@@ -123,8 +119,24 @@ export const stripeWebHook = async (request, response) => {
             break;
         }
     }
+    response.status(200).json({ received: true });
 }
 
+const toUnderstand= {
+    //  Checkout Session:
+    // const session = await stripe.checkout.sessions.create({...});
+
+    // Is temporary (valid for a few hours)
+    // Represents one attempt to pay
+    // Knows what the user is buying (course name, price, quantity, etc.)
+    // Has redirect links for success and cancel
+    // Returns a URL to Stripes checkout page
+    //  You send this session.url to frontend and redirect the user there.
+
+    //  Payment Intent =“The actual payment transaction that moves money from user to you.”
+
+    // Checkout Session  →  Payment Intent  →  Card charge attempt
+}
 const sampleStripeWebhook = {
 
     "id": "evt_1NG8Du2eZvKYlo2CUI79vXWy",
