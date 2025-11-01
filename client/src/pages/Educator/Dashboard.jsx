@@ -2,16 +2,38 @@ import React, { useEffect, useState } from 'react';
 import { assets, dummyDashboardData } from '../../../LMS_assets/assets/assets';
 import { useAppContext } from '../../context/AuthContext';
 import Loading from '../../components/Student/Loading';
+import axios from 'axios';
+import { toast } from 'react-toastify';
 
 const Dashboard = () => {
 
-    const {currency, isEducator}= useAppContext();
+    const {currency, isEducator, getToken, backendUrl}= useAppContext();
     const [dashboardData, setDashboardData] = useState(null);
 
-    const fetchDbData = () => {
-        setDashboardData(dummyDashboardData);
-    }
+    const fetchDbData = async () => {
+      try {
 
+      const token = await getToken()
+
+      const { data } = await axios.get(backendUrl + '/api/educator/dashboard',
+        { headers: { Authorization: `Bearer ${token}` } }
+      )
+
+      if (data.success) {
+        console.log(data.dashboardData);
+        
+        setDashboardData(data.dashboardData)
+      } else {
+        toast.error(data.message)
+      }
+
+    } catch (error) {
+      toast.error(error.message)
+    }
+    }
+    useEffect(() => {
+      console.log('consoling db data' , dashboardData);
+    })
     useEffect(()=>{
         if(isEducator){
             fetchDbData();
@@ -25,7 +47,7 @@ const Dashboard = () => {
           <div className='flex items-center gap-3 shadow-card border border-blue-500 p-4 w-56 rounded-md'>
             <img src={assets.patients_icon} alt="patients_icon" />
             <div>
-              <p className='text-2xl font-medium text-gray-600'>{dashboardData.enrolledStudentsData.length}</p>
+              <p className='text-2xl font-medium text-gray-600'>{dashboardData.enrolledStudents.length}</p>
               <p className='text-base text-gray-500'>Total Enrolments</p>
             </div>
           </div>
@@ -39,7 +61,7 @@ const Dashboard = () => {
           <div className='flex items-center gap-3 shadow-card border border-blue-500 p-4 w-56 rounded-md'>
             <img src={assets.earning_icon} alt="patients_icon" />
             <div>
-              <p className='text-2xl font-medium text-gray-600'>{currency}{Math.floor(dashboardData.totalEarnings)}</p>
+              <p className='text-2xl font-medium text-gray-600'>{currency}{Math.floor(dashboardData.totalEarning)}</p>
               <p className='text-base text-gray-500'>Total Earnings</p>
             </div>
           </div>
@@ -56,7 +78,7 @@ const Dashboard = () => {
                 </tr>
               </thead>
               <tbody className="text-sm text-gray-500">
-                {dashboardData.enrolledStudentsData.map((item, index) => (
+                {dashboardData.enrolledStudents.map((item, index) => (
                   <tr key={index} className="border-b border-gray-500/20">
                     <td className="px-4 py-3 text-center hidden sm:table-cell">{index + 1}</td>
                     <td className="md:px-4 px-2 py-3 flex items-center space-x-3">

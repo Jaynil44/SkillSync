@@ -85,9 +85,6 @@ export const stripeWebHook = async (request, response) => {
     
     const currPurchase = await Purchase.findById(purchaseId);
     
-    console.log('Webhook Event Type:', event.type);
-    console.log('Payment Intent ID:', paymentIntent.id);
-    console.log('Session:', session.data[0]);
     switch (event.type) {
         case 'payment_intent.succeeded':{
 

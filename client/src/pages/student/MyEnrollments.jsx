@@ -1,15 +1,53 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAppContext } from '../../context/AuthContext';
 import { Line } from 'rc-progress';
 import Footer from '../../components/Student/Footer';
+import axios from 'axios';
+import { toast } from 'react-toastify';
 
 const MyEnrollments = () => {
 
-    const {enrolledCourses, calculateCourseDuration, navigate} = useAppContext();
+    const {enrolledCourses,calculateNoOfLectures, calculateCourseDuration, navigate, getToken, backendUrl, userData, fetchEnrolledCourses} = useAppContext();
     const [progressArray, setProgress] = useState([]);
     //set the progress and other part when woring on the backend!!
 
+    const fetchCourseProgress = async () => {
+        try {
+            const token = await getToken();
+
+            const tempCourseProgress = await Promise.all(
+                enrolledCourses.map(async (course) => {
+                    const { data } = await axios.post(
+                        `${backendUrl}/api/user/get-course-progress`,
+                        { courseId: course._id },
+                        { headers: { Authorization: `Bearer ${token}` } }
+                    );
+
+                    let total = calculateNoOfLectures(course);
+                    let completed = data.progressData ? data.progressData.length : 0;
+
+                    return {total, completed};
+                })
+            )
+
+            setProgress(tempCourseProgress);
+        } catch (error) {
+            toast.error(error.message);
+        }
+    }
     
+    useEffect(() => {
+        if(userData){
+            fetchEnrolledCourses();
+        }
+    }, [userData]);
+
+    useEffect(()=>{
+        if(enrolledCourses.length > 0){
+            fetchCourseProgress();
+        }
+    }, [enrolledCourses]);
+
     return (
         <>
 

@@ -2,8 +2,14 @@ import Quill from "quill";
 import React, { useEffect, useRef, useState } from "react";
 import { assets } from "../../../LMS_assets/assets/assets";
 import uniqid from "uniqid";
+import { toast } from "react-toastify";
+import { useAppContext } from "../../context/AuthContext.jsx";
+import axios from "axios";
 
 const AddCourse = () => {
+
+  const {getToken, backendUrl} = useAppContext()
+
   const quillRef = useRef(null);
   const editorRef = useRef(null);
   //useRef holds the dom element
@@ -16,8 +22,8 @@ const AddCourse = () => {
   const [showPopup, setShowPopup] = useState(false);
   const [currentChapterId, setCurrentChapterId] = useState(null);
   const [lectureDetails, setLectureDetails] = useState({
-    lextureTitle: "",
-    lectureURL: "",
+    lectureTitle: "",
+    lectureUrl: "",
     lectureDuration: 0,
     isPreviewFree: false,
   });
@@ -32,8 +38,8 @@ const AddCourse = () => {
   }, []);
 
   useEffect(() => {
-    console.log(chapters);
-  }, [chapters]);
+    console.log(image);
+  }, [image]);
 
   const handleChapter = (action, chapterId) => {
     if (action === "add") {
@@ -110,7 +116,49 @@ const AddCourse = () => {
     });
   };
 
-  const handleSubmit = () => {};
+  const handleSubmit = async (e) => {
+    try {
+      e.preventDefault();
+      if(!image){
+        toast.error('No thumbnail selected!!');
+      }
+      const courseData = {
+        courseTitle, 
+        coursePrice : Number(coursePrice), 
+        courseDiscount : Number(discount), 
+        courseDescription : quillRef.current.root.innerHTML, 
+        courseContent: chapters 
+      }
+
+      const formData = new FormData();
+      formData.append('courseData', JSON.stringify(courseData));
+      formData.append('image', image);
+
+      const token = await getToken()
+
+      const { data } = await axios.post(
+        `${backendUrl}/api/educator/add-course`,
+        formData,
+        { headers: {Authorization: `Bearer ${token}` } }
+      )
+
+      if(data.success){
+        toast.success(data.message)
+        setCourseTitle('')
+        setCoursePrice(0)
+        setDiscount(0)
+        setImage(null)
+        setChapters([])
+        quillRef.current.root.innerHTML = ""
+        console.log(data.newCourse);
+      }
+      else{
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
 
   return (
     <div className="h-screen overflow-scroll flex flex-col items-start justify-between md:p-8 md:pb-0 p-4 pt-8 pb-0">
@@ -341,7 +389,7 @@ const AddCourse = () => {
                   onClick={() => setShowPopup(false)}
                   src={assets.cross_icon}
                   className="absolute top-4 right-4 w-4 cursor-pointer"
-                  alt=""
+                  alt='POPUPSTR'
                 />
               </div>
             </div>

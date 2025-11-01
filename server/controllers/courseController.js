@@ -7,7 +7,7 @@ export const getAllCourses = async (req, res) => {
     try {
         //in  displaying all courses(in home page) we dont content or students data 
         // also we want educator name so we populated it 
-        const allCourses = await Course.find({isPublished : true}, '-courseContent -enrolledStudents').populate('educator');
+        const allCourses = await Course.find({isPublished : true}, '-courseContent -enrolledStudents')
         res.status(200).json({
             success : true, 
             courses : allCourses
@@ -26,6 +26,12 @@ export const getCourseById = async (req, res) => {
 
     try {
         const course1 = await Course.findById(Id).populate('educator');
+
+        // If no course found, return 404 instead of allowing toObject() to throw
+        if (!course1) {
+            return res.status(404).json({ success: false, message: 'Course not found' });
+        }
+
         const course = course1.toObject();
         //if preview not available then dont send the lecture url...!!
         course.courseContent.forEach((singleChapter) => {
@@ -44,6 +50,11 @@ export const getCourseById = async (req, res) => {
         })
 
     } catch (error) {
+        // If the error is a CastError (invalid ObjectId), return 400 to help debugging
+        if (error.name === 'CastError') {
+            return res.status(400).json({ success: false, error: 'Invalid course id' });
+        }
+
         res.status(500).json({
             success : false, 
             error : error.message

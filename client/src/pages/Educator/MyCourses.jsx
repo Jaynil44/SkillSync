@@ -1,18 +1,36 @@
 import React, { useEffect, useState } from 'react';
 import { useAppContext } from '../../context/AuthContext';
 import Loading from '../../components/Student/Loading';
+import axios from 'axios';
+import { toast } from 'react-toastify';
 
 const MyCourses = () => {
 
-    const {allcourses, currency} = useAppContext();
+    const { currency, getToken, backendUrl} = useAppContext();
 
     const [courses, setCourses] = useState([]);
-    const setEduCourses = async () => {
-        setCourses(allcourses);
+
+    const fetchEduCourses = async () => {
+      try {
+        const token = await getToken();
+
+        const {data} = await axios.get(
+          `${backendUrl}/api/educator/courses`, 
+          {headers : {Authorization : `Bearer ${token}`}}
+        )
+
+        if(data.success){
+          setCourses(data.courses);
+        }
+        else{
+          toast.error(data.message);
+        }
+      } catch (error) {
+        toast.error(error.message);
+      }
     }
     useEffect(()=>{
-        setEduCourses();
-        console.log(courses);
+        fetchEduCourses();
     }, [courses]);
 
     return courses ? (
@@ -36,7 +54,7 @@ const MyCourses = () => {
                     <img src={course.courseThumbnail} alt="Course Image" className="w-16" />
                     <span className="truncate hidden md:block">{course.courseTitle}</span>
                   </td>
-                  <td className="px-4 py-3">{currency} {Math.floor(course.enrolledStudents.length * (course.coursePrice - course.discount * course.coursePrice / 100))}</td>
+                  <td className="px-4 py-3">{currency} {Math.floor(course.enrolledStudents.length * (course.coursePrice - course.courseDiscount * course.coursePrice / 100))}</td>
                   <td className="px-4 py-3">{course.enrolledStudents.length}</td>
                   <td className="px-4 py-3">
                     {new Date(course.createdAt).toLocaleDateString()}

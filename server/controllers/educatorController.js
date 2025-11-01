@@ -28,17 +28,16 @@ export const studentToEdu = async (req, res) => {
 
 // adding course
 export const addCourse = async (req, res) => {
-    //controller to write in the add course
     try{
         const educatorId = req.auth().userId;
         const {courseData} = req.body;
-        const imageFile = req.file;
+        const image = req.file;
 
-        if(!imageFile){
-            res.status(400).json({success : false, message : 'course thumbnail not attached'});
+        if(!image){
+            return res.status(400).json({success : false, message : 'course thumbnail not attached'});
         }
 
-        const imageUpload = await cloudinary.uploader.upload(imageFile.path);
+        const imageUpload = await cloudinary.uploader.upload(image.path);
         const cloudImageUrl = imageUpload.secure_url;
 
         const parsedCourseData = JSON.parse(courseData);
@@ -56,11 +55,10 @@ export const addCourse = async (req, res) => {
             newCourse
         });
     }
-    catch(err){
-        // console.log(err);
-        
+    catch(error){
+        console.error("ADD COURSE ERROR =>", error);
         res.status(500).json({
-            success  : false, error : err.message
+            success  : false, error : error.message
         })
     }
 }
@@ -71,7 +69,7 @@ export const getEducatorCourses = async (req, res) => {
         const educatorId = req.auth().userId;
         const allCourses = await Course.find({educator : educatorId, isPublished : true});
         
-        res.status(201).json({
+        res.status(200).json({
             success : true, 
             courses : allCourses
         })
@@ -120,7 +118,7 @@ export const educatorDashboardData = async (req, res) => {
         };
 
         res.json({
-            status : true, 
+            success : true, 
             dashboardData : {
                 totalEarning, 
                 totalCourses, 

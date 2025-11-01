@@ -6,7 +6,9 @@ import { Link } from "react-router-dom";
 const CourseCard = ({ course }) => {
   const { currency, avgRating } = useAppContext();
   // console.log(avgRating(course));
-
+  console.log(course);
+  console.log('educator obj => ', course.educator);
+  
   return (
     <Link
       to={"/course/" + course._id}
@@ -17,7 +19,7 @@ const CourseCard = ({ course }) => {
 
       <div className="p-3 text-left">
         <h3 className="text-base font-semibold">{course.courseTitle}</h3>
-        <p className="text-gray-500">{course.educator.name}</p>
+        <p className="text-gray-500">{course && course.educator ? course.educator.userName : 'no one'}</p>
 
         <div className="flex items-center space-x-2">
           <p>{avgRating(course)}</p>
@@ -40,14 +42,14 @@ const CourseCard = ({ course }) => {
               )
             )}
           </div>
-          <p className="text-gray-500">{course.courseRatings.length}</p>
+          <p className="text-gray-500">{course.courseRating.length}</p>
         </div>
 
         <p className="text-base font-semibold text-gray-800">
           {currency}
           {(
             course.coursePrice -
-            (course.discount * course.coursePrice) / 100
+            (course.courseDiscount * course.coursePrice) / 100
           ).toFixed(2)}
         </p>
       </div>

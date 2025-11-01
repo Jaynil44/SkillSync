@@ -9,7 +9,7 @@ import Progress from "../models/Progress.js";
 export const getUser = async (req, res) => {
     try {
         const userId = req.auth().userId;
-        const user = await User.findById(userId);
+        const user = await User.find({userId});
 
         if(!user) {
             return res.status(400).json({success : false, error : 'invalid user'});
@@ -25,7 +25,7 @@ export const getUser = async (req, res) => {
 export const getEnrolledCourses = async (req, res) => {
     try {
         const userId = req.auth().userId;
-        const user = await User.findById(userId).populate('enrolledCourses');
+        const user = await User.find({userId}).populate('enrolledCourses');
 
         return res.status(200).json({
             status : true, 
@@ -92,12 +92,15 @@ export const purchaseCourse = async (req, res) => {
             metadata: { //our own-custom properties => we will be getting this metadata object as it is in the webhook obj
                         //so choose its fields carefully!!
                 purchaseId : newPurchase._id.toString()
+            },
+            payment_intent_data: {
+                metadata: { purchaseId: newPurchase._id.toString() } // <- ensures PaymentIntent has the ID
             }
         });
 
         res.status(201).json({
             success: true, 
-            session : session.url
+            session_url : session.url
         });
     } catch (error) {
         res.json({
@@ -145,7 +148,7 @@ export const updateUserCourseProgress = async (req, res) => {
 export const getUserCourseProgress = async (req, res) => {
     try {
         const {userId} = req.auth();
-        const {courseId, lectureId} = req.body;
+        const {courseId} = req.body;
 
         const progressData = await Progress.find({courseId, userId});
         

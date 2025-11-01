@@ -20,19 +20,21 @@ await cloudinaryConfig();
 
 //Middlewares
 app.use(cors());
-
 app.use(clerkMiddleware());
+
 
 //port for server to listen
 const port = process.env.PORT || 5000;
 
 //defining all the api endpoints
 app.get('/', (req, res) => res.send("server working"));
-app.post('/clerk' , express.json(), clerkWebHooks); // this is the 
+// Stripe requires the raw body to verify the signature. Mount the stripe route
+// before any middleware that may consume the body (like Clerk middleware).
+app.post('/stripe', express.raw({ type: 'application/json' }), stripeWebHook); 
+app.post('/clerk' , express.json(), clerkWebHooks); 
 app.use('/api/educator', express.json() , eduRouter);
 app.use('/api/course', express.json(), courseRouter);
 app.use('/api/user',express.json(), userRouter);
-app.post('/stripe', express.raw({ type: 'application/json' }), stripeWebHook); // stripe needs raw not json so no express.json() here.
 
 //listening
 app.listen(port, ()=>{

@@ -7,7 +7,7 @@ import {addCourse} from '../controllers/educatorController.js'
 
 const eduRouter = express.Router();
 
-eduRouter.patch('/update-role', studentToEdu);
+eduRouter.patch('/update-role', requireAuth(), studentToEdu);
 eduRouter.post('/add-course', upload.single('image') , protectEdu, addCourse);
 eduRouter.get('/courses', protectEdu ,getEducatorCourses);
 eduRouter.get('/dashboard', protectEdu, educatorDashboardData);
